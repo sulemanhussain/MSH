@@ -1,0 +1,110 @@
+﻿@{
+    ViewBag.TItle = "Add Query";
+}
+
+@model MSH.Entities.QnA.Query;
+
+<div class="container">
+    <div class="row bg-silver-dark p-2">
+        <div class="col-8">
+            <h2>Add Query</h2>
+        </div>
+        <div class="col-4">
+            <a asp-controller="Query" asp-action="Index" title="Close" class="close-button">
+                <i class="fa fa-times"></i> Close
+            </a>
+        </div>
+    </div>
+</div>
+<hr />
+<form asp-controller="Query" asp-action="AddQuery" asp-antiforgery="true" method="post">
+    <div id="frmFields">
+        <input type="hidden" asp-for="@Model.QueryID" />
+        <div class="form-group">
+            <label asp-for="@Model.Question"></label>
+            <input asp-for="@Model.Question" type="text" class="form-control" />
+            <span asp-validation-for="@Model.Question" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.Answer"></label>
+            <textarea asp-for="@Model.Answer" type="text" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="@Model.Answer" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.CategoryID"></label>
+            <select index="0" asp-for="@Model.CategoryID" asp-items="@ViewBag.Category" class="form-control">
+                <option disabled="disabled" selected="selected">Select</option>
+            </select>
+            <span asp-validation-for="@Model.CategoryID" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="@Model.Tag"></label> (provide comma (,) seperated values)
+            <input asp-for="@Model.Tag" type="text" class="form-control" />
+            <span asp-validation-for="@Model.Tag" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-row">
+        <button type="submit" class="btn btn-primary">Submit</button>  &nbsp;
+        <a asp-controller="Query" asp-action="Index" class="btn btn-outline-dark">Close</a>
+    </div>
+</form>
+
+<script type="text/javascript">
+    var count = 1;
+    var arrCategory = [0];
+    $(document).ready(function () {
+
+        //tinymce.init({
+        //    selector: '#Answer',
+        //    plugins: 'autoresize lists wordcount fullscreen print preview '
+        //});
+
+        tinymce.init({
+            selector: '#Answer',
+            plugins: 'a11ychecker advcode casechange export formatpainter linkchecker autolink lists checklist media mediaembed pageembed permanentpen powerpaste table advtable tinycomments tinymcespellchecker autoresize',
+            toolbar: 'a11ycheck addcomment showcomments casechange checklist code export formatpainter pageembed permanentpen table numlist bullist',
+            toolbar_mode: 'floating',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+        });
+
+        //$("form").find("div.form-group:last [name='CategoryID']").change(function (event) {
+        //    cascadeCategory(event.target);
+        //});
+    });
+
+    function cascadeCategory(thisObject) {
+                @*$.ajax({
+                    type: 'get',
+                    url: '@Url.Action("ChildCategory")',
+                    dataType: 'json',
+                    data: { categoryID: $(thisObject).val() },
+                    success: function (response) {
+                        var currentIndex = $(thisObject).attr("index");
+                        if (arrCategory.indexOf(parseInt(currentIndex)) > -1) {
+                            $("form").find("[index='" + currentIndex + "']").closest("div").remove();
+                            arrCategory.splice(currentIndex, 1);
+                        }
+                        if (response !== null && response.length > 0) {
+                            var childElement = '<div class="form-group"><label>Category level-' + count + '</label>' +
+                                '<select id="CategoryID' + count + '" name="CategoryID" index="'+count+'" class="form-control">'+
+                                '<option disabled="disabled" selected="selected">Select</option>';
+                            $.each(response, function (ind, category) {
+                                childElement += '<option value="' + category.value + '">' + category.text + '</option>';
+                            });
+                            childElement += '</select ></div>';
+                            $("form").find("div#frmFields").append(childElement);
+                            $("#CategoryID" + count).on('change', function (ele) {
+                                cascadeCategory(ele.target);
+                            });
+                            arrCategory.push(count);
+                            count++;
+                        }
+                    },
+                    error: function (error) {
+                        console.error(error);
+                    }
+                });*@
+                return false;
+            }
+</script>

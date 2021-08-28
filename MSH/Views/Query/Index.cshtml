@@ -1,0 +1,205 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewBag.Title = "Interview Questions & Answers";
+}
+
+@using MSH.Web.Models.ViewModels;
+@using MSH.Web.Utility;
+@using MSH.Entities.QnA;
+@model QueryPaginationVM;
+
+<div class="container">
+    <div>
+        <h2>Interview Question and Answers</h2>
+        @*<a asp-controller="Query" asp-action="AddQuery" title="Submit Query" class="plus-button btn btn-primary">
+            <i class="fa fa-search"></i> Search
+        </a>*@
+        <a asp-controller="Query" asp-action="AddQuery" title="Submit Query" class="plus-button btn btn-primary">
+            <i class="fa fa-plus"></i> Submit Query
+        </a>
+    </div>
+    <hr />
+    <div class="search">
+        <form asp-action="Index" asp-controller="Query" method="post">
+            <div class="row col-12">
+                <div class="col-lg-3 col-xl-3 col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="CategoryID">Category</label>
+                        <select id="CategoryID" name="CategoryID" asp-items="@ViewBag.Category" class="form-control">
+                            <option selected="selected" value="-1">Select</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-xl-3 col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="Tags">Tag</label>
+                        <input type="search" id="Tag" name="Tag" class="form-control" value="@ViewBag.Tags" />
+                    </div>
+                </div>
+                <div class="col-lg-3 col-xl-3 col-sm-12 col-md-3">
+                    <div class="form-group">
+                        <label for="Question">Question</label>
+                        <input type="search" id="Question" name="Question" class="form-control" value="@ViewBag.Question" />
+                    </div>
+                </div>
+                <div class="col-lg-3 col-xl-3mt-4 col-sm-12 col-md-3 search-buttons">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <button type="reset" class="btn btn-outline-dark">Clear</button>
+                </div>
+            </div>
+            <div>
+                <input type="hidden" name="CurrentIndex" value="@(Model.Pagination != null ? Model.Pagination.CurrentIndex : 1)" />
+            </div>
+        </form>
+    </div>
+    
+    <div class="query-all">
+
+        @{
+            if (Model.Queries != null)
+            {
+                <div class="row">
+                    @foreach (var item in Model.Queries)
+                    {
+                        <div class="col-12 pb-2 query-block p-3">
+                            <h6>
+                                <label data-toggle="collapse" href="#collapseExample_@item.GUID" role="button" aria-expanded="false" aria-controls="collapseExample_@item.GUID">
+                                    <strong>@item.Question</strong> &nbsp;
+                                </label>
+                                <a asp-controller="Query" asp-action="AddQuery" asp-route-guid="@item.GUID" class="fa fa-edit" title="Edit"></a>
+                                &nbsp; <a href="javascript:void(0);" onclick="DeleteConfirmation('@item.GUID')" class="fa fa-trash" title="Delete"></a>
+                            </h6>
+                            <div class="collapse" id="collapseExample_@item.GUID">
+                                <label>
+                                    @Html.Raw(item.Answer)
+                                </label>
+                            </div>
+                            <p>
+                                <em>
+                                    suggested tags:
+                                    @{@if (!string.IsNullOrEmpty(item.Tag))
+                                        {
+                                            foreach (var data in item.Tag.Split(','))
+                                            {
+                                                <span class="badge badge-pill badge-dark">@data</span>
+                                            }
+                                        }
+                                    }
+                                </em>
+                            </p>
+                        </div>
+                    }
+                </div>
+
+                <div class="clearfix p-3">
+                    @{
+                        if (Model.Pagination != null)
+                        {
+                            <ul class="pagination justify-content-center">
+                                @for (int i = 1; i <= Model.Pagination.PageCount; i++)
+                                {
+                                    <li class="page-item @(i== Model.Pagination.CurrentIndex ? "active" : "")">
+                                        <a class="page-link cursor-pointer" onclick="pagination(@i)"> @i </a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    }
+                </div>
+            }
+        }
+
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            @*<div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Are you sure?</h5>
+
+                </div>*@
+            <div class="modal-body text-center">
+                @*<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>*@
+                <i class="fas fa-exclamation-triangle fa-4x warning-icon"></i>
+                <p></p>
+                <h5>Are you sure</h5>
+                <p>you want to delete this query?</p>
+                <div class="modal-buttons justify-content-center">
+                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="DeleteQuery()">Yes</button>
+                </div>
+            </div>
+            @*<div class="modal-footer text-center">
+
+                </div>*@
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+    });
+
+    var queryID = '';
+
+    function DeleteConfirmation(queryId) {
+        queryID = queryId;
+        $('#exampleModalCenter').modal({
+            show: true
+        });
+    }
+
+    function DeleteQuery() {
+        $('#exampleModalCenter').modal('toggle');
+         $.ajax({
+            type: 'get',
+            url: '@Url.Action("DeleteQuery")',
+            dataType: 'json',
+             data: { guid: queryID },
+            success: function (response) {
+                console.log(response);
+                window.location.reload();
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+
+    function pagination(currentIndex) {
+        $("form").find("input[name='CurrentIndex']").val(currentIndex);
+        $("form").submit();
+    }
+
+</script>
+
+
+@*<style type="text/css">
+
+            #collapseExample.collapse:not(.show) {
+                display: block;
+                height: 3rem;
+                overflow: hidden;
+            }
+
+            #collapseExample.collapsing {
+                height: 3rem;
+            }
+
+            a.collapsed::after {
+                content: '+ Show More';
+            }
+
+            a:not(.collapsed)::after {
+                content: '- Show Less';
+            }
+    </style>*@
